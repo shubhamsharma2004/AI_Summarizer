@@ -10,6 +10,8 @@ from datetime import datetime, timezone
 load_dotenv()
 
 app = FastAPI(title="AI Document Analyzer")
+BASE_DIR = pathlib.Path(__file__).resolve().parent
+PUBLIC_DIR = BASE_DIR / "public"
 
 PROVIDER = os.getenv("PROVIDER", "openai").lower()
 RATE_LIMIT = int(os.getenv("RATE_LIMIT_PER_HOUR", "20"))
@@ -329,4 +331,5 @@ async def clear_history():
 
 
 # ── Serve Frontend ───────────────────────────────────────────
-app.mount("/", StaticFiles(directory="public", html=True), name="static")
+if PUBLIC_DIR.exists():
+    app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")

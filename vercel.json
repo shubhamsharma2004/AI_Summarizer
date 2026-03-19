@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "main.py": {
+      "includeFiles": "public/**"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/main.py"
+    }
+  ]
+}

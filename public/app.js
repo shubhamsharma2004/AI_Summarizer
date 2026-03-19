@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load active provider info
   fetch('/api/provider')
-    .then(r => r.json())
+    .then(r => safeJson(r))
     .then(data => {
       document.getElementById('provider-label').textContent = 'Powered by ' + data.label;
       document.getElementById('footer-text').textContent =
@@ -77,6 +77,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (file) setFile(file);
   });
 });
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+async function safeJson(res) {
+  const text = await res.text();
+  if (!text) throw new Error(`Server returned an empty response (status ${res.status}).`);
+  try { return JSON.parse(text); } catch { throw new Error(`Unexpected server response: ${text.slice(0, 120)}`); }
+}
 
 /* ============================================================
    TAB SWITCHING
@@ -134,7 +143,7 @@ async function analyze() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text })
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (!res.ok || !data.success) throw new Error(data.detail || data.error || 'Analysis failed.');
       renderResults(data.result, null, data.cached);
     } catch (err) {
@@ -154,7 +163,7 @@ async function analyze() {
       const formData = new FormData();
       formData.append('file', selectedFile);
       const res = await fetch('/api/analyze-file', { method: 'POST', body: formData });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (!res.ok || !data.success) throw new Error(data.detail || data.error || 'Analysis failed.');
       renderResults(data.result, data.fileName, data.cached);
     } catch (err) {
@@ -335,7 +344,7 @@ async function switchLang(lang) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ result: lastResult }),
     });
-    const data = await res.json();
+    const data = await safeJson(res);
     if (!res.ok || !data.success) throw new Error(data.detail || 'Translation failed.');
     lastResultHindi = data.result;
     currentLang = 'hi';
@@ -376,7 +385,7 @@ async function loadHistory() {
   list.innerHTML = '';
   try {
     const res = await fetch('/api/history');
-    const data = await res.json();
+    const data = await safeJson(res);
     const items = data.items || [];
 
     countEl.textContent = items.length;

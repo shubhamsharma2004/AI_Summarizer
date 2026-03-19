@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+openai
+anthropic
+upstash-redis
+python-dotenv
+python-multipart
+PyMuPDF
+python-docx
